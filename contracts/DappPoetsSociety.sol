@@ -9,15 +9,13 @@ contract DappPoetsSociety is Ownable{
 
     // storage
     struct Poet {
-        string name;
         address account;
         uint256 totalRewardEarned;
-        uint256[] poems;
+        uint256 poems;
     }
 
     struct Poem {
         string poem;
-        uint256 timestamp;
         address poetAddress;
         uint256 earnedRewards;
     }
@@ -42,12 +40,11 @@ contract DappPoetsSociety is Ownable{
     // tipAuthor
 
     // Register a new User
-    function register(address _account, string memory _name) public returns (Poet memory){
-        Poet memory newPoet = Poet(_name, _account, 0, new uint256[](0));
+    function register(address _account) public {
+        Poet memory newPoet = Poet(_account, 0, 0);
         poets[_account] = newPoet;
         poetExists[_account] = true;
         issueRegisterationTokens(_account);
-        return newPoet;
     }
 
     function issueRegisterationTokens(address _account) public {
@@ -59,13 +56,11 @@ contract DappPoetsSociety is Ownable{
     }
     
     // create new post
-    function createPost(string memory _poem, uint256 _timestamp) public returns(Poem memory){
+    function createPost(string memory _poem) public {
         address author = address(msg.sender);
-        Poem memory newPoem = Poem(_poem, _timestamp, author, 0);
+        Poem memory newPoem = Poem(_poem, author, 0);
         poems.push(newPoem);
-        uint256 index = poems.length-1;
-        poets[author].poems.push(index);
-        return newPoem;
+        poets[author].poems = poets[author].poems + 1;    
     }
 
     // to tip a particular poem
@@ -82,8 +77,16 @@ contract DappPoetsSociety is Ownable{
         poets[_author].totalRewardEarned = poets[_author].totalRewardEarned + _amount;
     }
 
-    function getPoetInfo(address _account) public returns(Poet memory) {
+    function getPoetInfo(address _account) public view returns(Poet memory) {
         return poets[_account];
+    }
+
+    function getPoems() public view returns(Poem[] memory) {
+        return poems;
+    }
+
+    function getAllPoemsCount() public view returns (uint256){
+        return poems.length;
     }
 
 }
